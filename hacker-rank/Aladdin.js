@@ -160,31 +160,78 @@ currentMagic -= nextPoint // 2 - 4 ----------- nextPoint > currentMagic, so not 
 
 */
 
+
+
+// utils
+
+const sumReduce = (a, b) => a + b;
+
+
+
+/*
+ * iterative solution 
+ */
+
 function optimalPointIterative(magic, dist) {
 
-   let totalMagic = magic.reduce((a, b) => a + b, 0);
-   let totalDist = dist.reduce((a, b) => a + b, 0);
-   if (totalMagic < totalDist) return -1
-   let total = 0
-   let result = 0
+   let totalMagic = magic.reduce(sumReduce, 0);
+   let totalDist = dist.reduce(sumReduce, 0);
+   if (totalMagic < totalDist) return -1;
+   let magicLeft = 0;
+   let result = 0;
    for (let i = 0; i < magic.length; i++) {
-      if (total < 0) {
+      if (magicLeft < 0) {
          result = i;
-         total = 0
+         magicLeft = 0;
       }
-      total += (magic[i] - dist[i])
-
+      magicLeft += (magic[i] - dist[i]);
    }
-   return result
+   return result;
 }
 
-console.log("--- iterative ---")
 
-const first = optimalPointIterative([3, 2, 5, 4], [2, 3, 4, 2]);
-console.log("first", first)
 
-const second = optimalPointIterative([2, 4, 5, 2], [4, 3, 1, 3]);
-console.log("second", second)
+/*
+ * recursive solution 
+ */
 
-const third = optimalPointIterative([8, 4, 1, 9], [10, 9, 3, 5]);
-console.log("third", third)
+function calculateMagicLeft(magic, dist, i, magicLeft, result) {
+   if (i < magic.length) {
+      if (magicLeft < 0) {
+         result = i;
+         magicLeft = 0;
+      }
+      magicLeft += (magic[i] - dist[i]);
+      i++;
+      result = calculateMagicLeft(magic, dist, i, magicLeft, result);
+   }
+   return result;
+}
+
+function optimalPointRecursive(magic, dist) {
+
+   let totalMagic = magic.reduce(sumReduce, 0);
+   let totalDist = dist.reduce(sumReduce, 0);
+   if (totalMagic < totalDist) return -1;
+   let result = calculateMagicLeft(magic, dist, 0, 0, 0);
+   return result;
+}
+
+
+
+/**
+ * tests
+ */
+
+const tests = [
+   { magic: [3, 2, 5, 4], dist: [2, 3, 4, 2] },
+   { magic: [2, 4, 5, 2], dist: [4, 3, 1, 3] },
+   { magic: [8, 4, 1, 9], dist: [10, 9, 3, 5] },
+   { magic: [2, 8, 7, 13], dist: [6, 10, 2, 4] }
+]
+
+tests.forEach(attempt => {
+   console.log(`${(attempt.magic)} - ${attempt.dist}`);
+   console.log("- iterative result:", optimalPointIterative(attempt.magic, attempt.dist));
+   console.log("- recursive result:", optimalPointRecursive(attempt.magic, attempt.dist));
+});
